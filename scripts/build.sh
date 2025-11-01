@@ -1,9 +1,8 @@
 #!/bin/bash
 
-mkdir -p build
+cmake -DCMAKE_INSTALL_PREFIX=install -B build
 
 pushd build
-cmake ..
 make -j$(nproc) install
 popd
 

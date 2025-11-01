@@ -1,19 +1,16 @@
-#include "texture.hpp"
+#include "dr4/texture_impl.hpp"
+
 #include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
-#include <iostream>
-
-namespace gfx {
 
 void
-Texture::SetSize( dr4::Vec2f size )
+dr4::impl::Texture::SetSize( dr4::Vec2f size )
 {
 }
 
 dr4::Vec2f
-Texture::GetSize() const
+dr4::impl::Texture::GetSize() const
 {
     auto sf_size = impl_.getSize();
 
@@ -21,19 +18,19 @@ Texture::GetSize() const
 }
 
 float
-Texture::GetWidth() const
+dr4::impl::Texture::GetWidth() const
 {
     return GetSize().x;
 }
 
 float
-Texture::GetHeight() const
+dr4::impl::Texture::GetHeight() const
 {
     return GetSize().y;
 }
 
 void
-Texture::Draw( const dr4::Rectangle& rect )
+dr4::impl::Texture::Draw( const dr4::Rectangle& rect )
 {
     sf::RectangleShape sf_rect;
 
@@ -48,13 +45,12 @@ Texture::Draw( const dr4::Rectangle& rect )
 }
 
 void
-Texture::Draw( const dr4::Text& text )
+dr4::impl::Texture::Draw( const dr4::Text& text )
 {
-
     sf::Text sf_text;
 
     sf_text.setCharacterSize( text.fontSize );
-    sf_text.setFont( font_ );
+    // sf_text.setFont( font_ );
     sf_text.setPosition( { text.pos.x, text.pos.y } );
     sf_text.setFillColor( { text.color.r, text.color.g, text.color.b, text.color.a } );
     sf_text.setString( text.text );
@@ -63,14 +59,12 @@ Texture::Draw( const dr4::Text& text )
 }
 
 void
-Texture::Draw( const dr4::Texture& texture, const dr4::Vec2f& pos )
+dr4::impl::Texture::Draw( const dr4::Texture& texture, const dr4::Vec2f& pos )
 {
-    const Texture& my_texture = dynamic_cast<const Texture&>( texture );
+    const dr4::impl::Texture& my_texture = dynamic_cast<const dr4::impl::Texture&>( texture );
 
     sf::Sprite sprite;
     sprite.setTexture( my_texture.impl_.getTexture() );
     sprite.setPosition( { pos.x, pos.y } );
     impl_.draw( sprite );
 }
-
-} // namespace gfx

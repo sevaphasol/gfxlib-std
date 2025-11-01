@@ -1,62 +1,65 @@
-#include "window.hpp"
+#include "dr4/window_impl.hpp"
+#include "dr4/texture.hpp"
+#include "dr4/texture_impl.hpp"
 
-namespace gfx {
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Window/Event.hpp>
 
 void
-Window::SetTitle( const std::string& title )
+dr4::impl::Window::SetTitle( const std::string& title )
 {
     title_ = title;
     impl_.setTitle( title_ );
 }
 
 const std::string&
-Window::GetTitle() const
+dr4::impl::Window::GetTitle() const
 {
     return title_;
 }
 
 void
-Window::SetSize( const dr4::Vec2f& size )
+dr4::impl::Window::SetSize( const dr4::Vec2f& size )
 {
     size_ = size;
     impl_.setSize( { static_cast<uint>( size.x ), static_cast<uint>( size.y ) } );
 }
 
 dr4::Vec2f
-Window::GetSize() const
+dr4::impl::Window::GetSize() const
 {
     return dr4::Vec2f( size_.x, size_.y );
 }
 
 void
-Window::Open()
+dr4::impl::Window::Open()
 {
     impl_.create( sf::VideoMode( size_.x, size_.y ), title_ );
     impl_.setFramerateLimit( 60 );
 }
 
 bool
-Window::IsOpen() const
+dr4::impl::Window::IsOpen() const
 {
     return impl_.isOpen();
 }
 
 void
-Window::Close()
+dr4::impl::Window::Close()
 {
     impl_.close();
 }
 
 void
-Window::Clear( const dr4::Color& color )
+dr4::impl::Window::Clear( const dr4::Color& color )
 {
     impl_.clear( sf::Color( color.r, color.g, color.b, color.a ) );
 }
 
 void
-Window::Draw( const dr4::Texture& texture, dr4::Vec2f pos )
+dr4::impl::Window::Draw( const dr4::Texture& texture, dr4::Vec2f pos )
 {
-    const Texture& my_texture = dynamic_cast<const Texture&>( texture );
+    const dr4::impl::Texture& my_texture = dynamic_cast<const dr4::impl::Texture&>( texture );
 
     sf::Sprite sprite;
     sprite.setTexture( my_texture.impl_.getTexture() );
@@ -65,19 +68,19 @@ Window::Draw( const dr4::Texture& texture, dr4::Vec2f pos )
 }
 
 void
-Window::Display()
+dr4::impl::Window::Display()
 {
     impl_.display();
 }
 
 dr4::Texture*
-Window::CreateTexture()
+dr4::impl::Window::CreateTexture()
 {
     return new Texture();
 }
 
 std::optional<dr4::Event>
-Window::PollEvent()
+dr4::impl::Window::PollEvent()
 {
     sf::Event sf_event;
 
@@ -90,7 +93,7 @@ Window::PollEvent()
 }
 
 dr4::Event
-Window::sfmlEventConvert( const sf::Event& sf_event )
+dr4::impl::Window::sfmlEventConvert( const sf::Event& sf_event )
 {
     dr4::Event event = {};
 
@@ -135,5 +138,3 @@ Window::sfmlEventConvert( const sf::Event& sf_event )
 
     return event;
 }
-
-} // namespace gfx

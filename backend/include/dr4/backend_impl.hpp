@@ -2,7 +2,8 @@
 
 #include "misc/dr4_ifc.hpp"
 
-namespace gfx {
+namespace dr4 {
+namespace impl {
 
 class DR4Backend : public dr4::DR4Backend {
   public:
@@ -17,4 +18,5 @@ class DR4Backend : public dr4::DR4Backend {
 extern "C" dr4::DR4Backend*
 CreateDR4Backend();
 
-} // namespace gfx
+} // namespace impl
+} // namespace dr4

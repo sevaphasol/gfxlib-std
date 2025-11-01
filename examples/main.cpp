@@ -17,7 +17,7 @@ main()
 
     std::string libdr4Path( dr4::DR4BackendFunctionName );
 
-    void* libdr4 = dlopen( "/home/sevsol/Projects/gfx/install/lib/libdr4.so", RTLD_LAZY );
+    void* libdr4 = dlopen( "./install/lib/libdr4.so", RTLD_LAZY );
 
     if ( !libdr4 )
     {
