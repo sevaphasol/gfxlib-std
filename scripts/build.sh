@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cmake -DCMAKE_INSTALL_PREFIX=install -B build
+cmake -DCMAKE_INSTALL_PREFIX=install -DBUILD_EXAMPLES=ON -B build
 
 pushd build
 make -j$(nproc) install
