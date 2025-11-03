@@ -1,6 +1,8 @@
 #include "dr4/img_impl.hpp"
 #include "dr4/math/color.hpp"
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Vertex.hpp>
+#include <SFML/System/Vector2.hpp>
 
 dr4::impl::Image::Image( unsigned width, unsigned height ) : w_( width ), h_( height )
 {
@@ -10,7 +12,7 @@ dr4::impl::Image::Image( unsigned width, unsigned height ) : w_( width ), h_( he
 void
 dr4::impl::Image::SetPixel( unsigned x, unsigned y, dr4::Color color )
 {
-    impl_[y][x] = { .position = { x, y }, .color = { color.r, color.g, color.b, color.a } };
+    impl_[y * w_ + x].color = { color.r, color.g, color.b, color.a };
 }
 
 dr4::Color
