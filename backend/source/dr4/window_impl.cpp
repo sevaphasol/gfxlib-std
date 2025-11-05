@@ -1,4 +1,7 @@
 #include "dr4/window_impl.hpp"
+#include "dr4/converts.hpp"
+#include "dr4/event.hpp"
+#include "dr4/font_impl.hpp"
 #include "dr4/img_impl.hpp"
 #include "dr4/texture.hpp"
 #include "dr4/texture_impl.hpp"
@@ -62,8 +65,7 @@ dr4::impl::Window::Draw( const dr4::Texture& texture, dr4::Vec2f pos )
 {
     const dr4::impl::Texture& my_texture = dynamic_cast<const dr4::impl::Texture&>( texture );
 
-    sf::Sprite sprite;
-    sprite.setTexture( my_texture.impl_.getTexture() );
+    sf::Sprite sprite( my_texture.impl_.getTexture() );
     sprite.setPosition( { pos.x, pos.y } );
     impl_.draw( sprite );
 }
@@ -84,6 +86,12 @@ dr4::Texture*
 dr4::impl::Window::CreateTexture()
 {
     return new dr4::impl::Texture();
+}
+
+dr4::Font*
+dr4::impl::Window::CreateFont()
+{
+    return new dr4::impl::Font();
 }
 
 std::optional<dr4::Event>
@@ -109,34 +117,36 @@ dr4::impl::Window::sfmlEventConvert( const sf::Event& sf_event )
         case sf::Event::Closed:
             event.type = dr4::Event::Type::QUIT;
             break;
-        // case sf::Event::TextEntered:
-        // event.type         = Event::TextEntered;
-        // event.text.unicode = sf_event.text.unicode;
-        // break;
+        case sf::Event::TextEntered:
+            event.type         = dr4::Event::Type::TEXT_EVENT;
+            event.text.unicode = sf_event.text.unicode;
+            break;
         case sf::Event::KeyPressed:
-            event.type = dr4::Event::Type::KEY_DOWN;
-            // event.key.code = detail::fromSFML( sf_event.key.code );
+            event.type    = dr4::Event::Type::KEY_DOWN;
+            event.key.sym = detail::fromSFML( sf_event.key.code );
+            event.key.mod = detail::fromSFML( sf_event.key );
             break;
         case sf::Event::KeyReleased:
-            event.type = dr4::Event::Type::KEY_UP;
-            // event.key.code = detail::fromSFML( sf_event.key.code );
+            event.type    = dr4::Event::Type::KEY_UP;
+            event.key.sym = detail::fromSFML( sf_event.key.code );
+            event.key.mod = detail::fromSFML( sf_event.key );
             break;
         case sf::Event::MouseButtonPressed:
-            event.type = dr4::Event::Type::MOUSE_DOWN;
-            // event.mouse_button.button = detail::fromSFML( sf_event.mouseButton.button );
-            // event.mouse_button.x      = sf_event.mouseButton.x;
-            // event.mouse_button.y      = sf_event.mouseButton.y;
+            event.type               = dr4::Event::Type::MOUSE_DOWN;
+            event.mouseButton.button = detail::fromSFML( sf_event.mouseButton.button );
+            event.mouseButton.pos.x  = sf_event.mouseButton.x;
+            event.mouseButton.pos.y  = sf_event.mouseButton.y;
             break;
         case sf::Event::MouseButtonReleased:
-            event.type = dr4::Event::Type::MOUSE_UP;
-            // event.mouse_button.button = detail::fromSFML( sf_event.mouseButton.button );
-            // event.mouse_button.x      = sf_event.mouseButton.x;
-            // event.mouse_button.y      = sf_event.mouseButton.y;
+            event.type               = dr4::Event::Type::MOUSE_UP;
+            event.mouseButton.button = detail::fromSFML( sf_event.mouseButton.button );
+            event.mouseButton.pos.x  = sf_event.mouseButton.x;
+            event.mouseButton.pos.y  = sf_event.mouseButton.y;
             break;
         case sf::Event::MouseMoved:
-            event.type = dr4::Event::Type::MOUSE_MOVE;
-            // event.mouse_move.x = sf_event.mouseMove.x;
-            // event.mouse_move.y = sf_event.mouseMove.y;
+            event.type            = dr4::Event::Type::MOUSE_MOVE;
+            event.mouseMove.pos.x = sf_event.mouseMove.x;
+            event.mouseMove.pos.y = sf_event.mouseMove.y;
             break;
         default:
             event.type = dr4::Event::Type::UNKNOWN;

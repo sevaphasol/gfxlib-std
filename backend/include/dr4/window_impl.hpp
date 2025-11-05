@@ -44,6 +44,9 @@ class Window : public dr4::Window {
     dr4::Texture*
     CreateTexture() override final;
 
+    dr4::Font*
+    CreateFont() override final;
+
     std::optional<dr4::Event>
     PollEvent() override final;
 

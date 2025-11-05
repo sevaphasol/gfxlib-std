@@ -5,7 +5,8 @@
 #include "dr4/texture.hpp"
 #include "dr4/texture_impl.hpp"
 
-#include <SFML/Graphics/VertexArray.hpp>
+#include <SFML/Graphics/Vertex.hpp>
+#include <vector>
 
 namespace dr4 {
 namespace impl {
@@ -33,7 +34,7 @@ class Image : public dr4::Image {
     GetHeight() const override final;
 
   private:
-    sf::VertexArray impl_;
+    std::vector<sf::Vertex> impl_;
 
     float w_ = 0;
     float h_ = 0;

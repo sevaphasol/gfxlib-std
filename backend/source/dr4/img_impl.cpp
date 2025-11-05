@@ -7,7 +7,12 @@
 void
 dr4::impl::Image::SetPixel( unsigned x, unsigned y, dr4::Color color )
 {
-    impl_[y * w_ + x].color = { color.r, color.g, color.b, color.a };
+    // // fprintf( stderr, "pos   = %d %d\n", x, y );
+    // // fprintf( stderr, "color = %d %d %d %d\n", color.r, color.g, color.b, color.a );
+
+    impl_[y * w_ + x].color    = { color.r, color.g, color.b, color.a };
+    impl_[y * w_ + x].position = sf::Vector2f( x, y );
+    impl_[y * w_ + x].position = sf::Vector2f( x, y );
 }
 
 dr4::Color
@@ -21,9 +26,10 @@ dr4::impl::Image::GetPixel( unsigned x, unsigned y ) const
 void
 dr4::impl::Image::SetSize( dr4::Vec2f size )
 {
+    // fprintf( stderr, "debug in %s:%d:%s\n", __FILE__, __LINE__, __PRETTY_FUNCTION__ );
     w_ = size.x;
     h_ = size.y;
-
+    // fprintf( stderr, "debug in %s:%d:%s\n", __FILE__, __LINE__, __PRETTY_FUNCTION__ );
     impl_.resize( w_ * h_ );
 }
 
