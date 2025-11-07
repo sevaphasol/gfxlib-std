@@ -144,9 +144,15 @@ dr4::impl::Window::sfmlEventConvert( const sf::Event& sf_event )
             event.mouseButton.pos.y  = sf_event.mouseButton.y;
             break;
         case sf::Event::MouseMoved:
-            event.type            = dr4::Event::Type::MOUSE_MOVE;
-            event.mouseMove.pos.x = sf_event.mouseMove.x;
-            event.mouseMove.pos.y = sf_event.mouseMove.y;
+            static ::dr4::Vec2f prev_mouse_pos = { 0, 0 }; // вова ест говно
+
+            event.type      = ::dr4::Event::Type::MOUSE_MOVE;
+            event.mouseMove = {
+                .pos = { static_cast<float>( sf_event.mouseMove.x ),
+                         static_cast<float>( sf_event.mouseMove.y ) },
+                .rel = { static_cast<float>( sf_event.mouseMove.x - prev_mouse_pos.x ),
+                         static_cast<float>( sf_event.mouseMove.y - prev_mouse_pos.y ) } };
+            prev_mouse_pos = event.mouseMove.pos;
             break;
         default:
             event.type = dr4::Event::Type::UNKNOWN;
