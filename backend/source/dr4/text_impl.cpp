@@ -95,11 +95,13 @@ dr4::impl::Text::DrawOn( dr4::Texture& texture ) const
 void
 dr4::impl::Text::SetPos( dr4::Vec2f pos )
 {
-    pos_ = { pos.x, pos.y };
+    impl_.setPosition( pos.x, pos.y );
 }
 
 dr4::Vec2f
 dr4::impl::Text::GetPos() const
 {
-    return { pos_.x, pos_.y };
+    const auto& sf_pos = impl_.getPosition();
+
+    return { sf_pos.x, sf_pos.y };
 }

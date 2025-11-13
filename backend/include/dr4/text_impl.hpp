@@ -55,7 +55,6 @@ class Text : public dr4::Text {
     }
 
   private:
-    sf::Vector2f    pos_;
     std::string     string_;
     dr4::impl::Font font_;
     sf::Text        impl_;
