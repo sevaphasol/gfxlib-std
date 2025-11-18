@@ -1,5 +1,3 @@
-#pragma once
-
 #include "dr4/font_impl.hpp"
 #include <cmath>
 

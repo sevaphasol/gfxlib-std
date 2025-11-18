@@ -1,5 +1,3 @@
-#pragma once
-
 #include "dr4/converts.hpp"
 #include "dr4/keycodes.hpp"
 #include "dr4/mouse_buttons.hpp"
