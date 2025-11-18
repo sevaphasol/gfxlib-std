@@ -51,6 +51,7 @@ endfunction()
 
 function( install_libs )
 	install( TARGETS dr4 DESTINATION lib )
+	install( TARGETS pp  DESTINATION lib )
 endfunction()
 
 #==============================================================================
