@@ -73,6 +73,8 @@ class Circle : public dr4::Circle {
     virtual void
     SetCenter( Vec2f center ) override final;
     virtual void
+    SetScale( dr4::Vec2f factor ) override final;
+    virtual void
     SetRadius( float radius ) override final;
     virtual void
     SetFillColor( Color color ) override final;
@@ -83,6 +85,8 @@ class Circle : public dr4::Circle {
 
     virtual Vec2f
     GetCenter() const override final;
+    virtual Vec2f
+    GetScale() const override final;
     virtual float
     GetRadius() const override final;
     virtual Color
@@ -112,8 +116,6 @@ class Circle : public dr4::Circle {
     }
 
   private:
-    float real_radius_;
-
     sf::CircleShape impl_;
 };
 
@@ -160,9 +162,6 @@ class Rectangle : public dr4::Rectangle {
     }
 
   private:
-    dr4::Vec2f real_size_;
-    dr4::Vec2f real_pos_;
-
     sf::RectangleShape impl_;
 };
 

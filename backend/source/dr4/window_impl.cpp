@@ -10,6 +10,7 @@
 
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Window/Event.hpp>
+#include <iostream>
 
 void
 dr4::impl::Window::SetTitle( const std::string& title )
@@ -189,6 +190,7 @@ dr4::impl::Window::sfmlEventConvert( const sf::Event& sf_event )
                          static_cast<float>( sf_event.mouseMove.y ) },
                 .rel = { static_cast<float>( sf_event.mouseMove.x - prev_mouse_pos.x ),
                          static_cast<float>( sf_event.mouseMove.y - prev_mouse_pos.y ) } };
+
             prev_mouse_pos = event.mouseMove.pos;
             break;
         default:

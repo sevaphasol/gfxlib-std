@@ -8,6 +8,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <cmath>
+#include <iostream>
 #include <memory>
 
 void
@@ -138,21 +139,31 @@ dr4::impl::Line::update() const
 void
 dr4::impl::Circle::SetCenter( dr4::Vec2f center )
 {
-    impl_.setOrigin( { center.x, center.y } );
+    auto  scale  = impl_.getScale();
+    float radius = impl_.getRadius();
+
+    float px = center.x - radius * scale.x;
+    float py = center.y - radius * scale.y;
+
+    impl_.setPosition( px, py );
 }
 
 void
 dr4::impl::Circle::SetPos( dr4::Vec2f pos )
 {
-    SetCenter( pos );
+    impl_.setPosition( { pos.x, pos.y } );
+}
+
+void
+dr4::impl::Circle::SetScale( dr4::Vec2f factor )
+{
+    impl_.setScale( factor.x, factor.y );
 }
 
 void
 dr4::impl::Circle::SetRadius( float radius )
 {
-    real_radius_ = radius;
-
-    impl_.setRadius( real_radius_ - 2 * GetBorderThickness() );
+    impl_.setRadius( radius );
 }
 
 void
@@ -170,29 +181,45 @@ dr4::impl::Circle::SetBorderColor( dr4::Color color )
 void
 dr4::impl::Circle::SetBorderThickness( float thickness )
 {
-    impl_.setOutlineThickness( thickness );
+    if ( thickness > 0 )
+    {
+        // std::cerr << "Warning: thickness > 0" << std::endl;
+    }
 
-    impl_.setRadius( real_radius_ - 2 * thickness );
+    impl_.setOutlineThickness( thickness );
 }
 
 dr4::Vec2f
 dr4::impl::Circle::GetCenter() const
 {
-    auto sf_origin = impl_.getOrigin();
+    auto  pos    = impl_.getPosition();
+    auto  scale  = impl_.getScale();
+    float radius = impl_.getRadius();
 
-    return { sf_origin.x, sf_origin.y };
+    float cx = pos.x + radius * scale.x;
+    float cy = pos.y + radius * scale.y;
+
+    return { cx, cy };
 }
 
 dr4::Vec2f
 dr4::impl::Circle::GetPos() const
 {
-    return GetCenter();
+    auto sf_pos = impl_.getPosition();
+
+    return { sf_pos.x, sf_pos.y };
+}
+
+dr4::Vec2f
+dr4::impl::Circle::GetScale() const
+{
+    return { impl_.getScale().x, impl_.getScale().y };
 }
 
 float
 dr4::impl::Circle::GetRadius() const
 {
-    return real_radius_;
+    return impl_.getRadius();
 }
 
 dr4::Color
@@ -228,23 +255,23 @@ dr4::impl::Circle::DrawOn( dr4::Texture& texture ) const
 
     sf_transform.translate( { tex_zero.x, tex_zero.y } );
 
+    // std::cerr << "Position  " << impl_.getPosition().x << " " << impl_.getPosition().y <<
+    // std::endl; std::cerr << "Radius    " << impl_.getRadius() << std::endl; std::cerr << "TexZero
+    // " << tex_zero.x << " " << tex_zero.y << std::endl;
+
     my_texture.GetImpl().draw( impl_, sf_transform );
 }
 
 void
 dr4::impl::Rectangle::SetPos( dr4::Vec2f pos )
 {
-    real_pos_ = pos;
-
-    impl_.setPosition( { real_pos_.x + GetBorderThickness(), real_pos_.y + GetBorderThickness() } );
+    impl_.setPosition( { pos.x, pos.y } );
 }
 
 void
 dr4::impl::Rectangle::SetSize( dr4::Vec2f size )
 {
-    real_size_ = size;
-
-    impl_.setSize( { size.x - 2 * GetBorderThickness(), size.y - 2 * GetBorderThickness() } );
+    impl_.setSize( { size.x, size.y } );
 }
 
 void
@@ -262,15 +289,20 @@ dr4::impl::Rectangle::SetBorderColor( dr4::Color color )
 void
 dr4::impl::Rectangle::SetBorderThickness( float thickness )
 {
+    if ( thickness > 0 )
+    {
+        // std::cerr << "Warning: thickness > 0" << std::endl;
+    }
+
     impl_.setOutlineThickness( thickness );
-    impl_.setSize( { real_size_.x - 2 * thickness, real_size_.y - 2 * thickness } );
-    impl_.setPosition( { real_pos_.x + GetBorderThickness(), real_pos_.y + GetBorderThickness() } );
 }
 
 dr4::Vec2f
 dr4::impl::Rectangle::GetPos() const
 {
-    return real_pos_;
+    auto sf_position = impl_.getPosition();
+
+    return { sf_position.x, sf_position.y };
 }
 
 dr4::Vec2f

@@ -12,21 +12,17 @@
 namespace pp {
 namespace impl {
 
-class Rect final : public ::pp::Shape {
+class Circle final : public ::pp::Shape {
     enum ResizeCircle {
-        CornerLftBot = 0,
-        CornerLftTop = 1,
-        CornerRhtTop = 2,
-        CornerRhtBot = 3,
-        SideLft      = 4,
-        SideRht      = 5,
-        SideTop      = 6,
-        SideBot      = 7,
-        Count        = 8,
+        Lft   = 0,
+        Top   = 1,
+        Rht   = 2,
+        Bot   = 3,
+        Count = 4,
     };
 
   public:
-    Rect( dr4::Window* window, const pp::ControlsTheme& theme, pp::State* state );
+    Circle( dr4::Window* window, const pp::ControlsTheme& theme, pp::State* state );
 
     bool
     OnMouseDown( const dr4::Event::MouseButton& evt ) override final;
@@ -49,9 +45,14 @@ class Rect final : public ::pp::Shape {
     GetPos() const override final;
 
     void
+    SetCenter( dr4::Vec2f pos );
+    dr4::Vec2f
+    GetCenter() const;
+
+    void
     SetSize( dr4::Vec2f size );
     dr4::Vec2f
-    GetSize();
+    GetSize() const;
 
   private:
     void
@@ -68,10 +69,10 @@ class Rect final : public ::pp::Shape {
     drawResizeCircles( dr4::Texture& tex ) const;
 
   private:
-    static constexpr float RectBorderThickness = 2.0f;
-    static constexpr float ResizeCircleRadius  = 5.0f;
+    static constexpr float CircleBorderThickness = 2.0f;
+    static constexpr float ResizeCircleRadius    = 5.0f;
 
-    std::unique_ptr<dr4::Rectangle> rect_;
+    std::unique_ptr<dr4::Circle> circle_;
 
     std::unique_ptr<dr4::Circle> rsz_circles_[ResizeCircle::Count];
 
