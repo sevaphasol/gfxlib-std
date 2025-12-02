@@ -33,13 +33,6 @@ class RectTool final : public ::pp::Tool {
     virtual bool
     OnMouseMove( const dr4::Event::MouseMove& evt ) override;
 
-    virtual bool
-    OnKeyDown( const dr4::Event::KeyEvent& evt ) override final;
-    virtual bool
-    OnKeyUp( const dr4::Event::KeyEvent& evt ) override final;
-    virtual bool
-    OnText( const dr4::Event::TextEvent& evt ) override final;
-
   private:
     ::pp::Canvas*   cvs_;
     pp::impl::Rect* rect_;

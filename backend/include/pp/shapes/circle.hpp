@@ -30,10 +30,6 @@ class Circle final : public ::pp::Shape {
     OnMouseUp( const dr4::Event::MouseButton& evt ) override final;
     bool
     OnMouseMove( const dr4::Event::MouseMove& evt ) override final;
-    virtual bool
-    OnKeyDown( const dr4::Event::KeyEvent& evt ) override final;
-    virtual bool
-    OnKeyUp( const dr4::Event::KeyEvent& evt ) override final;
 
     void
     OnSelect() override final;
