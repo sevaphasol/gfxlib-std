@@ -60,6 +60,11 @@ class Window : public dr4::Window {
     GetDefaultFont() override final;
 
     virtual void
+    SetClipBoard( const std::string& string ) override final;
+    virtual std::string
+    GetClipBoard() override final;
+
+    virtual void
     StartTextInput() override final
     {
     }

@@ -11,19 +11,15 @@
 #include "pp/shapes/text.hpp"
 #include "pp/tools/text.hpp"
 
-pp::impl::Text::Text( dr4::Window*               window,
-                      const ::pp::ControlsTheme& theme,
-                      pp::Canvas*                cvs,
-                      pp::impl::TextTool*        text_tool )
+pp::impl::Text::Text( dr4::Window* window, const ::pp::ControlsTheme& theme, pp::Canvas* cvs )
     : rect_( window->CreateRectangle() ),
       text_( window->CreateText() ),
       cursor_( window->CreateRectangle() ),
       selection_rect_( window->CreateRectangle() ),
-      cvs_( cvs ),
-      text_tool_( text_tool )
+      cvs_( cvs )
 {
     rect_->SetBorderThickness( RectBorderThickness );
-    rect_->SetBorderColor( { 118, 185, 0 } );
+    rect_->SetBorderColor( cvs_->GetControlsTheme().lineColor );
     rect_->SetFillColor( cvs_->GetControlsTheme().shapeColor );
 
     text_->SetFont( window->GetDefaultFont() );
@@ -107,54 +103,38 @@ pp::impl::Text::OnMouseMove( const dr4::Event::MouseMove& evt )
 bool
 pp::impl::Text::OnKeyDown( const dr4::Event::KeyEvent& evt )
 {
-    if ( evt.sym == dr4::KEYCODE_BACKSPACE )
+    switch ( evt.sym )
     {
-        ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 ) ? ctrlBackspace() : backspace();
-        return true;
-    }
-
-    if ( evt.sym == dr4::KEYCODE_DELETE )
-    {
-        ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 ) ? ctrlDel() : del();
-
-        return true;
-    }
-
-    if ( evt.sym == dr4::KEYCODE_LEFT || evt.sym == dr4::KEYCODE_RIGHT )
-    {
-        size_t old_pos = cursor_pos_;
-
-        bool shift = ( evt.mods & dr4::KEYMOD_SHIFT ) != 0;
-
-        if ( shift )
-        {
-            if ( !selection_active_ )
+        case dr4::KEYCODE_BACKSPACE:
             {
-                selection_pos_    = old_pos;
-                selection_active_ = true;
+                ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 ) ? ctrlBackspace() : backspace();
+                return true;
             }
-        } else
-        {
-            clearSelection();
-        }
+        case dr4::KEYCODE_DELETE:
+            {
+                ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 ) ? ctrlDel() : del();
+                return true;
+            }
+        case dr4::KEYCODE_HOME:
+            {
+                ( ( evt.mods & dr4::KEYMOD_SHIFT ) != 0 ) ? shiftHome() : home();
+                return true;
+            }
+        case dr4::KEYCODE_END:
+            {
+                ( ( evt.mods & dr4::KEYMOD_SHIFT ) != 0 ) ? shiftEnd() : end();
+                return true;
+            }
 
-        if ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 )
-        {
-            ( evt.sym == dr4::KEYCODE_LEFT ) ? moveCursorWordLeft() : moveCursorWordRight();
-        } else
-        {
-            ( evt.sym == dr4::KEYCODE_LEFT ) ? decrementCursor() : incrementCursor();
-        }
+        case dr4::KEYCODE_LEFT:
+        case dr4::KEYCODE_RIGHT:
+            {
+                arrows( evt );
+                return true;
+            }
 
-        if ( selection_active_ && selection_pos_ == cursor_pos_ )
-        {
-            clearSelection();
-        }
-
-        cursor_visible_         = true;
-        cursor_last_blink_time_ = cvs_->GetWindow()->GetTime();
-
-        return true;
+        default:
+            break;
     }
 
     if ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 )
@@ -176,6 +156,11 @@ pp::impl::Text::OnKeyDown( const dr4::Event::KeyEvent& evt )
             case dr4::KEYCODE_W:
                 ctrlW();
                 break;
+            case dr4::KEYCODE_S:
+                ctrlS();
+                break;
+            case dr4::KEYCODE_Z:
+                ( ( evt.mods & dr4::KEYMOD_SHIFT ) != 0 ) ? ctrlShiftZ() : ctrlZ();
             default:
                 break;
         }
@@ -352,8 +337,17 @@ pp::impl::Text::updateRect()
 }
 
 void
+pp::impl::Text::refreshCursor()
+{
+    cursor_last_blink_time_ = cvs_->GetWindow()->GetTime();
+    cursor_visible_         = true;
+}
+
+void
 pp::impl::Text::put( char c )
 {
+    ctrlS();
+
     if ( hasSelection() )
     {
         auto [begin, end] = getSelectionRange();
@@ -366,6 +360,50 @@ pp::impl::Text::put( char c )
     ++cursor_pos_;
     text_->SetText( string_ );
     updateRect();
+}
+
+void
+pp::impl::Text::home()
+{
+    cursor_pos_ = 0;
+    updateRect();
+    refreshCursor();
+}
+
+void
+pp::impl::Text::end()
+{
+    cursor_pos_ = string_.size();
+    updateRect();
+    refreshCursor();
+}
+
+void
+pp::impl::Text::shiftHome()
+{
+    if ( cursor_pos_ != 0 )
+    {
+        selection_active_ = true;
+        selection_pos_    = cursor_pos_;
+        cursor_pos_       = 0;
+    }
+
+    updateRect();
+    refreshCursor();
+}
+
+void
+pp::impl::Text::shiftEnd()
+{
+    if ( cursor_pos_ != string_.size() )
+    {
+        selection_active_ = true;
+        selection_pos_    = cursor_pos_;
+        cursor_pos_       = string_.size();
+    }
+
+    updateRect();
+    refreshCursor();
 }
 
 void
@@ -562,7 +600,9 @@ pp::impl::Text::copySelected() const
 void
 pp::impl::Text::pasteFromClipboard()
 {
-    const std::string& clip = text_tool_->GetClipboard();
+    ctrlS();
+
+    const std::string& clip = cvs_->GetWindow()->GetClipBoard();
 
     if ( hasSelection() )
     {
@@ -653,6 +693,8 @@ pp::impl::Text::moveCursorWordRight()
 void
 pp::impl::Text::ctrlBackspace()
 {
+    ctrlS();
+
     size_t start_pos = getLeftWordPos();
     if ( start_pos < cursor_pos_ )
     {
@@ -668,6 +710,8 @@ pp::impl::Text::ctrlBackspace()
 void
 pp::impl::Text::ctrlDel()
 {
+    ctrlS();
+
     size_t end_pos = getRightWordPos();
     if ( end_pos > cursor_pos_ )
     {
@@ -682,27 +726,25 @@ pp::impl::Text::ctrlDel()
 void
 pp::impl::Text::ctrlX()
 {
-    text_tool_->SetClipboard( copySelected() );
-    text_tool_->SetClipboardSingleUse( true );
+    ctrlS();
+
+    cvs_->GetWindow()->SetClipBoard( copySelected() );
     eraseSelected();
+    refreshCursor();
 }
 
 void
 pp::impl::Text::ctrlC()
 {
-    text_tool_->SetClipboard( copySelected() );
-    text_tool_->SetClipboardSingleUse( false );
+    cvs_->GetWindow()->SetClipBoard( copySelected() );
+    refreshCursor();
 }
 
 void
 pp::impl::Text::ctrlV()
 {
     pasteFromClipboard();
-
-    if ( text_tool_->GetClipboardSingleUse() )
-    {
-        text_tool_->GetClipboard().erase();
-    }
+    refreshCursor();
 }
 
 void
@@ -710,7 +752,8 @@ pp::impl::Text::ctrlA()
 {
     selection_active_ = true;
     selection_pos_    = 0;
-    cursor_pos_       = string_.end() - string_.begin();
+    cursor_pos_       = string_.size();
+    refreshCursor();
     updateRect();
 }
 
@@ -718,5 +761,91 @@ void
 pp::impl::Text::ctrlW()
 {
     ctrlBackspace();
+    refreshCursor();
     updateRect();
+}
+
+void
+pp::impl::Text::arrows( dr4::Event::KeyEvent evt )
+{
+    size_t old_pos = cursor_pos_;
+
+    bool shift = ( evt.mods & dr4::KEYMOD_SHIFT ) != 0;
+
+    if ( shift )
+    {
+        if ( !selection_active_ )
+        {
+            selection_pos_    = old_pos;
+            selection_active_ = true;
+        }
+    } else
+    {
+        clearSelection();
+    }
+
+    if ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 )
+    {
+        ( evt.sym == dr4::KEYCODE_LEFT ) ? moveCursorWordLeft() : moveCursorWordRight();
+    } else
+    {
+        ( evt.sym == dr4::KEYCODE_LEFT ) ? decrementCursor() : incrementCursor();
+    }
+
+    if ( selection_active_ && selection_pos_ == cursor_pos_ )
+    {
+        clearSelection();
+    }
+
+    refreshCursor();
+}
+
+void
+pp::impl::Text::ctrlS()
+{
+    undo_stack_.push( { string_, cursor_pos_ } );
+    while ( !redo_stack_.empty() )
+    {
+        redo_stack_.pop();
+    }
+}
+
+void
+pp::impl::Text::ctrlZ()
+{
+    if ( undo_stack_.empty() )
+    {
+        return;
+    }
+
+    redo_stack_.push( { string_, cursor_pos_ } );
+    auto [prev_str, prev_cursor] = undo_stack_.top();
+    undo_stack_.pop();
+
+    string_     = prev_str;
+    cursor_pos_ = prev_cursor;
+    clearSelection();
+    text_->SetText( string_ );
+    updateRect();
+    refreshCursor();
+}
+
+void
+pp::impl::Text::ctrlShiftZ()
+{
+    if ( redo_stack_.empty() )
+    {
+        return;
+    }
+
+    undo_stack_.push( { string_, cursor_pos_ } );
+    auto [next_str, next_cursor] = redo_stack_.top();
+    redo_stack_.pop();
+
+    string_     = next_str;
+    cursor_pos_ = next_cursor;
+    clearSelection();
+    text_->SetText( string_ );
+    updateRect();
+    refreshCursor();
 }

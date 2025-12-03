@@ -71,7 +71,7 @@ pp::impl::TextTool::OnMouseDown( const dr4::Event::MouseButton& evt )
     {
         is_drawing_ = true;
         cvs_->SetSelectedShape( nullptr );
-        text_ = new pp::impl::Text( cvs_->GetWindow(), cvs_->GetControlsTheme(), cvs_, this );
+        text_ = new pp::impl::Text( cvs_->GetWindow(), cvs_->GetControlsTheme(), cvs_ );
         cvs_->AddShape( text_ );
         text_->SetPos( evt.pos );
         text_->SetIsDrawing( true );
@@ -144,34 +144,4 @@ pp::impl::TextTool::OnText( const dr4::Event::TextEvent& evt )
     }
 
     return text_->OnText( evt );
-}
-
-void
-pp::impl::TextTool::SetClipboard( const std::string& str )
-{
-    clipboard_ = str;
-}
-
-const std::string&
-pp::impl::TextTool::GetClipboard() const
-{
-    return clipboard_;
-}
-
-std::string&
-pp::impl::TextTool::GetClipboard()
-{
-    return clipboard_;
-}
-
-void
-pp::impl::TextTool::SetClipboardSingleUse( bool state )
-{
-    clipboard_single_use_ = state;
-}
-
-bool
-pp::impl::TextTool::GetClipboardSingleUse() const
-{
-    return clipboard_single_use_;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <stack>
 
 #include "dr4/event.hpp"
 #include "dr4/math/vec2.hpp"
@@ -17,10 +18,7 @@ class TextTool;
 
 class Text final : public pp::Shape {
   public:
-    Text( dr4::Window*             window,
-          const pp::ControlsTheme& theme,
-          pp::Canvas*              cvs,
-          pp::impl::TextTool*      text_tool );
+    Text( dr4::Window* window, const pp::ControlsTheme& theme, pp::Canvas* cvs );
 
     bool
     OnMouseDown( const dr4::Event::MouseButton& evt ) override final;
@@ -53,7 +51,22 @@ class Text final : public pp::Shape {
 
   private:
     void
+    refreshCursor();
+
+    void
     put( char c );
+
+    void
+    arrows( dr4::Event::KeyEvent evt );
+
+    void
+    home();
+    void
+    end();
+    void
+    shiftHome();
+    void
+    shiftEnd();
 
     void
     backspace();
@@ -74,6 +87,12 @@ class Text final : public pp::Shape {
     ctrlA();
     void
     ctrlW();
+    void
+    ctrlS();
+    void
+    ctrlZ();
+    void
+    ctrlShiftZ();
 
     void
     decrementCursor();
@@ -126,8 +145,7 @@ class Text final : public pp::Shape {
     std::unique_ptr<dr4::Text>      text_;
     std::unique_ptr<dr4::Rectangle> rect_;
 
-    pp::Canvas*         cvs_       = nullptr;
-    pp::impl::TextTool* text_tool_ = nullptr;
+    pp::Canvas* cvs_ = nullptr;
 
     std::unique_ptr<dr4::Rectangle> cursor_;
 
@@ -146,6 +164,9 @@ class Text final : public pp::Shape {
 
     float ascent_;
     float descent_;
+
+    std::stack<std::tuple<std::string, size_t>> undo_stack_;
+    std::stack<std::tuple<std::string, size_t>> redo_stack_;
 };
 
 } // namespace impl

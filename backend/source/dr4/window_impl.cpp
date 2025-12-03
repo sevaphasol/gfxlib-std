@@ -9,6 +9,7 @@
 #include "dr4/texture_impl.hpp"
 
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Window/Clipboard.hpp>
 #include <SFML/Window/Event.hpp>
 #include <chrono>
 #include <iostream>
@@ -146,6 +147,18 @@ dr4::Font*
 dr4::impl::Window::GetDefaultFont()
 {
     return font_;
+}
+
+void
+dr4::impl::Window::SetClipBoard( const std::string& string )
+{
+    sf::Clipboard::setString( string );
+}
+
+std::string
+dr4::impl::Window::GetClipBoard()
+{
+    return sf::Clipboard::getString();
 }
 
 dr4::Rectangle*
