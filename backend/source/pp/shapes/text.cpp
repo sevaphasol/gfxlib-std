@@ -42,6 +42,8 @@ pp::impl::Text::OnMouseDown( const dr4::Event::MouseButton& evt )
         return false;
     }
 
+    OnSelect();
+
     if ( !is_drawing_ )
     {
         is_dragged_ = true;
