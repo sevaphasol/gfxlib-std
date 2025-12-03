@@ -151,6 +151,11 @@ pp::impl::Text::OnKeyDown( const dr4::Event::KeyEvent& evt )
 {
     switch ( evt.sym )
     {
+        case dr4::KEYCODE_ENTER:
+            {
+                OnDeselect();
+                return true;
+            }
         case dr4::KEYCODE_BACKSPACE:
             {
                 ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 ) ? ctrlBackspace() : backspace();
@@ -222,7 +227,7 @@ pp::impl::Text::OnText( const dr4::Event::TextEvent& evt )
     {
         auto ch = *evt.unicode;
 
-        if ( ( std::iscntrl( ch ) != 0 ) && ch != '\n' && ch != '\t' && ch != '\r' )
+        if ( ( std::iscntrl( ch ) != 0 ) && ch != '\t' )
         {
             return false;
         }
@@ -253,7 +258,9 @@ pp::impl::Text::OnSelect()
 void
 pp::impl::Text::OnDeselect()
 {
-    is_drawing_ = false;
+    is_drawing_       = false;
+    selection_active_ = false;
+    is_selecting_     = false;
 }
 
 void
@@ -265,7 +272,7 @@ pp::impl::Text::SetIsDrawing( bool state )
 void
 pp::impl::Text::DrawOn( dr4::Texture& texture ) const
 {
-    if ( is_drawing_ )
+    if ( is_drawing_ || cvs_->GetSelectedShape() == this )
     {
         rect_->DrawOn( texture );
     }
