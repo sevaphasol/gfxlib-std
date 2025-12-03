@@ -2,14 +2,12 @@
 #include <cctype>
 #include <cmath>
 #include <iostream>
-#include <string_view>
 
 #include "dr4/event.hpp"
 #include "dr4/keycodes.hpp"
 #include "dr4/math/rect.hpp"
 #include "dr4/math/vec2.hpp"
 #include "pp/shapes/text.hpp"
-#include "pp/tools/text.hpp"
 
 pp::impl::Text::Text( dr4::Window* window, const ::pp::ControlsTheme& theme, pp::Canvas* cvs )
     : rect_( window->CreateRectangle() ),
@@ -39,24 +37,72 @@ pp::impl::Text::OnMouseDown( const dr4::Event::MouseButton& evt )
         return false;
     }
 
-    if ( onMe( evt.pos ) )
+    if ( !onMe( evt.pos ) )
     {
-        if ( is_drawing_ )
-        {
-            insertCursor( evt.pos );
-            clearSelection();
-            is_selecting_ = true;
-        } else
-        {
-            is_dragged_ = true;
-        }
+        return false;
+    }
 
-        OnSelect();
-
+    if ( !is_drawing_ )
+    {
+        is_dragged_ = true;
         return true;
     }
 
-    return false;
+    double now     = cvs_->GetWindow()->GetTime();
+    float  dx      = evt.pos.x - last_click_pos_.x;
+    float  dy      = evt.pos.y - last_click_pos_.y;
+    float  dist_sq = dx * dx + dy * dy;
+
+    if ( ( now - last_click_time_ ) <= DoubleClickTime &&
+         dist_sq <= ( ClickMoveThreshold * ClickMoveThreshold ) )
+    {
+        ++click_count_;
+    } else
+    {
+        click_count_ = 1;
+    }
+
+    last_click_time_ = now;
+    last_click_pos_  = evt.pos;
+
+    switch ( click_count_ )
+    {
+        case 1:
+            {
+                insertCursor( evt.pos );
+                clearSelection();
+                is_selecting_ = true;
+                OnSelect();
+                break;
+            }
+
+        case 2:
+            {
+                insertCursor( evt.pos );
+                selectWordAtCursor();
+                is_selecting_ = true;
+                OnSelect();
+                break;
+            }
+
+        case 3:
+            {
+                selectString();
+                is_selecting_ = true;
+                OnSelect();
+                click_count_     = 0;
+                last_click_time_ = 0.0;
+                break;
+            }
+
+        default:
+            break;
+    }
+
+    refreshCursor();
+    updateRect();
+
+    return true;
 }
 
 bool
@@ -848,4 +894,53 @@ pp::impl::Text::ctrlShiftZ()
     text_->SetText( string_ );
     updateRect();
     refreshCursor();
+}
+
+void
+pp::impl::Text::selectWordAtCursor()
+{
+    size_t n = string_.size();
+    if ( n == 0 )
+    {
+        clearSelection();
+        return;
+    }
+
+    size_t pos = cursor_pos_;
+    if ( pos == n )
+    {
+        pos = n - 1;
+    }
+
+    size_t l = pos;
+    size_t r = pos;
+
+    int want_space = std::isspace( string_[pos] );
+
+    while ( l > 0 && ( std::isspace( ( string_[l - 1] ) ) == want_space ) )
+    {
+        --l;
+    }
+
+    while ( r < n && ( std::isspace( ( string_[r] ) ) == want_space ) )
+    {
+        ++r;
+    }
+
+    selection_pos_ = l;
+    cursor_pos_    = r;
+
+    selection_active_ = ( selection_pos_ != cursor_pos_ );
+    text_->SetText( string_ );
+    updateRect();
+}
+
+void
+pp::impl::Text::selectString()
+{
+    selection_pos_    = 0;
+    cursor_pos_       = string_.size();
+    selection_active_ = ( cursor_pos_ != selection_pos_ );
+    text_->SetText( string_ );
+    updateRect();
 }

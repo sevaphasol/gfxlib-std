@@ -134,6 +134,11 @@ class Text final : public pp::Shape {
     void
     clearSelection();
 
+    void
+    selectWordAtCursor();
+    void
+    selectString();
+
   private:
     static constexpr float RectBorderThickness = 2.0f;
     static constexpr float RectMarginX         = 10.0f;
@@ -167,6 +172,13 @@ class Text final : public pp::Shape {
 
     std::stack<std::tuple<std::string, size_t>> undo_stack_;
     std::stack<std::tuple<std::string, size_t>> redo_stack_;
+
+    double     last_click_time_ = 0.0;
+    dr4::Vec2f last_click_pos_  = { 0, 0 };
+    size_t     click_count_     = 0;
+
+    static constexpr double DoubleClickTime    = 0.45;
+    static constexpr float  ClickMoveThreshold = 6.0f;
 };
 
 } // namespace impl
