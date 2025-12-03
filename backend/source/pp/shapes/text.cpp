@@ -168,11 +168,13 @@ pp::impl::Text::OnKeyDown( const dr4::Event::KeyEvent& evt )
             case dr4::KEYCODE_Z:
                 ( ( evt.mods & dr4::KEYMOD_SHIFT ) != 0 ) ? ctrlShiftZ() : ctrlZ();
             default:
-                break;
+                return false;
         }
+
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 bool

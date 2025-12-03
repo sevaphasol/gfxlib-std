@@ -45,6 +45,8 @@ pp::impl::TextTool::OnBreak()
         is_drawing_ = false;
         text_->SetIsDrawing( false );
         cvs_->DelShape( text_ );
+        cvs_->SetSelectedShape( nullptr );
+        text_ = nullptr;
     }
 }
 
@@ -56,6 +58,7 @@ pp::impl::TextTool::OnEnd()
         is_drawing_ = false;
         text_->SetIsDrawing( false );
         text_->OnSelect();
+        text_ = nullptr;
     }
 }
 
