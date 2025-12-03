@@ -28,8 +28,6 @@ class Text final : public pp::Shape {
     OnMouseMove( const dr4::Event::MouseMove& evt ) override final;
     bool
     OnKeyDown( const dr4::Event::KeyEvent& evt ) override final;
-    // virtual bool
-    // OnKeyUp( const dr4::Event::KeyEvent& evt ) override final;
     virtual bool
     OnText( const dr4::Event::TextEvent& evt ) override final;
 
@@ -52,6 +50,8 @@ class Text final : public pp::Shape {
   private:
     void
     refreshCursor();
+    bool
+    textContains( dr4::Vec2f rel ) const;
 
     void
     put( char c );
@@ -138,6 +138,12 @@ class Text final : public pp::Shape {
     selectWordAtCursor();
     void
     selectString();
+
+    void
+    handleTextClick( const dr4::Event::MouseButton& evt );
+
+    bool
+    OnKeyDownReadOnly( const dr4::Event::KeyEvent& evt );
 
   private:
     static constexpr float RectBorderThickness = 2.0f;

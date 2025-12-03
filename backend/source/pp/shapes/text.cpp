@@ -44,65 +44,13 @@ pp::impl::Text::OnMouseDown( const dr4::Event::MouseButton& evt )
 
     OnSelect();
 
-    if ( !is_drawing_ )
+    if ( is_drawing_ || textContains( evt.pos ) )
     {
-        is_dragged_ = true;
+        handleTextClick( evt );
         return true;
     }
 
-    double now     = cvs_->GetWindow()->GetTime();
-    float  dx      = evt.pos.x - last_click_pos_.x;
-    float  dy      = evt.pos.y - last_click_pos_.y;
-    float  dist_sq = dx * dx + dy * dy;
-
-    if ( ( now - last_click_time_ ) <= DoubleClickTime &&
-         dist_sq <= ( ClickMoveThreshold * ClickMoveThreshold ) )
-    {
-        ++click_count_;
-    } else
-    {
-        click_count_ = 1;
-    }
-
-    last_click_time_ = now;
-    last_click_pos_  = evt.pos;
-
-    switch ( click_count_ )
-    {
-        case 1:
-            {
-                insertCursor( evt.pos );
-                clearSelection();
-                is_selecting_ = true;
-                OnSelect();
-                break;
-            }
-
-        case 2:
-            {
-                insertCursor( evt.pos );
-                selectWordAtCursor();
-                is_selecting_ = true;
-                OnSelect();
-                break;
-            }
-
-        case 3:
-            {
-                selectString();
-                is_selecting_ = true;
-                OnSelect();
-                click_count_     = 0;
-                last_click_time_ = 0.0;
-                break;
-            }
-
-        default:
-            break;
-    }
-
-    refreshCursor();
-    updateRect();
+    is_dragged_ = true;
 
     return true;
 }
@@ -115,7 +63,7 @@ pp::impl::Text::OnMouseUp( const dr4::Event::MouseButton& evt )
         return false;
     }
 
-    if ( is_drawing_ && is_selecting_ )
+    if ( is_selecting_ )
     {
         is_selecting_     = false;
         selection_active_ = ( selection_pos_ != cursor_pos_ );
@@ -130,7 +78,7 @@ pp::impl::Text::OnMouseUp( const dr4::Event::MouseButton& evt )
 bool
 pp::impl::Text::OnMouseMove( const dr4::Event::MouseMove& evt )
 {
-    if ( is_drawing_ && is_selecting_ )
+    if ( is_selecting_ )
     {
         insertCursor( evt.pos );
         selection_active_ = ( selection_pos_ != cursor_pos_ );
@@ -151,11 +99,16 @@ pp::impl::Text::OnMouseMove( const dr4::Event::MouseMove& evt )
 bool
 pp::impl::Text::OnKeyDown( const dr4::Event::KeyEvent& evt )
 {
+    if ( !is_drawing_ )
+    {
+        return OnKeyDownReadOnly( evt );
+    }
+
     switch ( evt.sym )
     {
         case dr4::KEYCODE_ENTER:
             {
-                OnDeselect();
+                is_drawing_ = false;
                 return true;
             }
         case dr4::KEYCODE_BACKSPACE:
@@ -219,7 +172,7 @@ pp::impl::Text::OnKeyDown( const dr4::Event::KeyEvent& evt )
         }
     }
 
-    return false;
+    return true;
 }
 
 bool
@@ -246,11 +199,6 @@ pp::impl::Text::OnSelect()
 {
     if ( cvs_->GetSelectedShape() != nullptr )
     {
-        if ( cvs_->GetSelectedShape() == this )
-        {
-            return;
-        }
-
         cvs_->GetSelectedShape()->OnDeselect();
     }
 
@@ -274,12 +222,14 @@ pp::impl::Text::SetIsDrawing( bool state )
 void
 pp::impl::Text::DrawOn( dr4::Texture& texture ) const
 {
+    std::cerr << cvs_->GetSelectedShape() << std::endl;
+
     if ( is_drawing_ || cvs_->GetSelectedShape() == this )
     {
         rect_->DrawOn( texture );
     }
 
-    if ( is_drawing_ && selection_active_ )
+    if ( selection_active_ )
     {
         selection_rect_->DrawOn( texture );
     }
@@ -952,4 +902,94 @@ pp::impl::Text::selectString()
     selection_active_ = ( cursor_pos_ != selection_pos_ );
     text_->SetText( string_ );
     updateRect();
+}
+
+bool
+pp::impl::Text::textContains( dr4::Vec2f rel ) const
+{
+    dr4::Vec2f rect_size = rect_->GetSize() - dr4::Vec2f( RectMarginX, RectMarginY );
+    dr4::Vec2f rect_pos  = rect_->GetPos() + dr4::Vec2f( RectMarginX, RectMarginY );
+
+    if ( rect_size.x < 0 )
+    {
+        rect_size.x = -rect_size.x;
+        rect_pos.x -= rect_size.x;
+    }
+
+    if ( rect_size.y < 0 )
+    {
+        rect_size.y = -rect_size.y;
+        rect_pos.y -= rect_size.y;
+    }
+
+    return dr4::Rect2f( rect_pos, rect_size ).Contains( rel );
+}
+
+void
+pp::impl::Text::handleTextClick( const dr4::Event::MouseButton& evt )
+{
+    double now     = cvs_->GetWindow()->GetTime();
+    float  dx      = evt.pos.x - last_click_pos_.x;
+    float  dy      = evt.pos.y - last_click_pos_.y;
+    float  dist_sq = dx * dx + dy * dy;
+
+    if ( ( now - last_click_time_ ) <= DoubleClickTime &&
+         dist_sq <= ( ClickMoveThreshold * ClickMoveThreshold ) )
+    {
+        ++click_count_;
+    } else
+    {
+        click_count_ = 1;
+    }
+
+    last_click_time_ = now;
+    last_click_pos_  = evt.pos;
+
+    switch ( click_count_ )
+    {
+        case 1:
+            insertCursor( evt.pos );
+            clearSelection();
+            is_selecting_ = true;
+            break;
+
+        case 2:
+            insertCursor( evt.pos );
+            selectWordAtCursor();
+            is_selecting_ = true;
+            break;
+
+        case 3:
+            selectString();
+            is_selecting_    = true;
+            click_count_     = 0;
+            last_click_time_ = 0.0;
+            break;
+    }
+
+    refreshCursor();
+    updateRect();
+}
+
+bool
+pp::impl::Text::OnKeyDownReadOnly( const dr4::Event::KeyEvent& evt )
+{
+    if ( ( evt.mods & dr4::KEYMOD_CTRL ) != 0 )
+    {
+        if ( evt.sym == dr4::KEYCODE_C )
+        {
+            cvs_->GetWindow()->SetClipBoard( copySelected() );
+            return true;
+        }
+        if ( evt.sym == dr4::KEYCODE_A )
+        {
+            selection_active_ = true;
+            selection_pos_    = 0;
+            cursor_pos_       = string_.size();
+            updateRect();
+            return true;
+        }
+    }
+
+    return false;
 }

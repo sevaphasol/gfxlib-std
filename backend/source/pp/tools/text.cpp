@@ -70,10 +70,15 @@ pp::impl::TextTool::OnMouseDown( const dr4::Event::MouseButton& evt )
     if ( !is_drawing_ )
     {
         is_drawing_ = true;
+        if ( cvs_->GetSelectedShape() != nullptr )
+        {
+            cvs_->GetSelectedShape()->OnDeselect();
+        }
         cvs_->SetSelectedShape( nullptr );
         text_ = new pp::impl::Text( cvs_->GetWindow(), cvs_->GetControlsTheme(), cvs_ );
         cvs_->AddShape( text_ );
         text_->SetPos( evt.pos );
+        text_->OnSelect();
         text_->SetIsDrawing( true );
 
         return true;
