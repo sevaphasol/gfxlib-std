@@ -1,26 +1,20 @@
 #include "dr4/img_impl.hpp"
-#include "dr4/math/color.hpp"
 #include "dr4/texture_impl.hpp"
 #include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/PrimitiveType.hpp>
-#include <SFML/Graphics/Transform.hpp>
-#include <SFML/Graphics/Vertex.hpp>
-#include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 void
 dr4::impl::Image::SetPixel( size_t x, size_t y, dr4::Color color )
 {
-    impl_[y * w_ + x].color      = { color.r, color.g, color.b, color.a };
-    impl_[y * w_ + x].position.x = x;
-    impl_[y * w_ + x].position.y = y;
+    impl_.setPixel( x, y, sf::Color{ color.r, color.g, color.b, color.a } );
 }
 
 dr4::Color
 dr4::impl::Image::GetPixel( size_t x, size_t y ) const
 {
-    const auto& v = impl_[y * w_ + x];
-
-    return { v.color.r, v.color.g, v.color.b, v.color.a };
+    const auto& c = impl_.getPixel( x, y );
+    return { c.r, c.g, c.b, c.a };
 }
 
 void
@@ -28,8 +22,7 @@ dr4::impl::Image::SetSize( dr4::Vec2f size )
 {
     w_ = size.x;
     h_ = size.y;
-
-    impl_.resize( size.x * size.y );
+    impl_.create( w_, h_ );
 }
 
 dr4::Vec2f
@@ -55,13 +48,18 @@ dr4::impl::Image::DrawOn( dr4::Texture& texture ) const
 {
     auto& my_texture = dynamic_cast<dr4::impl::Texture&>( texture );
 
-    sf::Transform transform = sf::Transform::Identity;
+    sf::Texture temp_sf_texture;
+    if ( !temp_sf_texture.create( w_, h_ ) )
+    {
+        return;
+    }
+    temp_sf_texture.update( impl_ );
 
-    auto tex_zero = my_texture.GetZero();
+    sf::Sprite sprite( temp_sf_texture );
+    auto       tex_zero = my_texture.GetZero();
+    sprite.setPosition( x_ + tex_zero.x, y_ + tex_zero.y );
 
-    transform.translate( { x_ + tex_zero.x, y_ + tex_zero.y } );
-
-    my_texture.GetImpl().draw( impl_.data(), impl_.size(), sf::PrimitiveType::Points, transform );
+    my_texture.GetImpl().draw( sprite );
 }
 
 void
@@ -75,4 +73,14 @@ dr4::Vec2f
 dr4::impl::Image::GetPos() const
 {
     return { x_, y_ };
+}
+
+void
+dr4::impl::Image::SetRawImage( const sf::Image& img )
+{
+    auto sf_size = img.getSize();
+
+    impl_ = img;
+    w_    = static_cast<float>( sf_size.x );
+    h_    = static_cast<float>( sf_size.y );
 }

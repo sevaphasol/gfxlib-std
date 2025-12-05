@@ -1,4 +1,5 @@
 #include "dr4/texture_impl.hpp"
+#include "dr4/img_impl.hpp"
 #include "dr4/math/color.hpp"
 #include "dr4/texture.hpp"
 #include <SFML/Graphics/Font.hpp>
@@ -116,7 +117,11 @@ dr4::impl::Texture::DrawOn( dr4::Texture& texture ) const
 dr4::Image*
 dr4::impl::Texture::GetImage() const
 {
-    std::cerr << "Sorry, " << __func__ << "unimplemented" << std::endl;
+    sf::Image sf_image = impl_.getTexture().copyToImage();
 
-    return nullptr;
+    auto* img = new dr4::impl::Image();
+    img->SetRawImage( sf_image );
+    img->SetPos( { 0.0f, 0.0f } );
+
+    return img;
 }

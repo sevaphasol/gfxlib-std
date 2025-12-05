@@ -4,8 +4,8 @@
 #include "dr4/math/vec2.hpp"
 #include "dr4/texture.hpp"
 
+#include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/Vertex.hpp>
-#include <vector>
 
 namespace dr4 {
 namespace impl {
@@ -35,6 +35,9 @@ class Image : public dr4::Image {
     virtual Vec2f
     GetPos() const override final;
 
+    void
+    SetRawImage( const sf::Image& img );
+
     auto&
     GetImpl()
     {
@@ -48,7 +51,7 @@ class Image : public dr4::Image {
     }
 
   private:
-    std::vector<sf::Vertex> impl_;
+    sf::Image impl_;
 
     float w_ = 0;
     float h_ = 0;
