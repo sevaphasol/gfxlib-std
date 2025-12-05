@@ -1,5 +1,6 @@
 #include "cum/ifc/pp_impl.hpp"
 
+#include "pp/tools/brush.hpp"
 #include "pp/tools/circle.hpp"
 #include "pp/tools/line.hpp"
 #include "pp/tools/rect.hpp"
@@ -15,6 +16,7 @@ cum::impl::PPToolPlugin::CreateTools( pp::Canvas* cvs )
     tools.emplace_back( std::make_unique<pp::impl::CircleTool>( cvs ) );
     tools.emplace_back( std::make_unique<pp::impl::LineTool>( cvs ) );
     tools.emplace_back( std::make_unique<pp::impl::TextTool>( cvs ) );
+    tools.emplace_back( std::make_unique<pp::impl::BrushTool>( cvs ) );
 
     return tools;
 }
