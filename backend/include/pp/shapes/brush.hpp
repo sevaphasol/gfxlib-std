@@ -22,7 +22,6 @@ class BrushShape final : public ::pp::Shape {
     dr4::Vec2f
     GetPos() const override final;
 
-    // Интерфейс для инструмента
     void
     AddPoint( dr4::Vec2f point );
     const std::vector<dr4::Vec2f>&

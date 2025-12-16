@@ -56,6 +56,33 @@ endfunction()
 
 #==============================================================================
 
+function( setup_custom_hui )
+	file( GLOB_RECURSE CUSTOM_HUI_BACKEND_SOURCES CONFIGURE_DEPENDS
+		${BACKEND_SOURCE_DIR}/custom-hui/*.cpp
+	)
+	add_library( custom-hui SHARED ${CUSTOM_HUI_BACKEND_SOURCES} )
+	target_include_directories( custom-hui PRIVATE ${BACKEND_INCLUDE_DIR} )
+
+	target_link_libraries(custom-hui PRIVATE dr4 )
+endfunction()
+
+#==============================================================================
+
+function( setup_custom_hui_interface )
+	add_library( custom-hui-interface INTERFACE )
+	target_include_directories(
+		custom-hui-interface INTERFACE ${BACKEND_INCLUDE_DIR}
+	)
+endfunction()
+
+#==============================================================================
+
+function( install_custom_hui )
+	install( TARGETS custom-hui DESTINATION core )
+endfunction()
+
+#==============================================================================
+
 function( install_core )
 	install( TARGETS cum DESTINATION core )
 	install( TARGETS hui DESTINATION core )
